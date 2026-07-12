@@ -1,0 +1,111 @@
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
+const { CreateCafeDto } = require('../dto/cafe.dto');
+const router = express.Router();
+
+const Cafe = require('../models/Cafe');
+const { where } = require('sequelize');
+
+router.post('/cafes', async (req, res) => {
+    try {
+        const dto = new CreateCafeDto(req.body);
+        console.log(dto);
+        const validationError = dto.validate();
+
+        if (validationError.success !== true) {
+            return res.status(400).json({
+                message: "line 17: " + validationError.message
+            });
+        } else{
+            const cafe = await Cafe.create({
+                Name: dto.Name,
+                Location: dto.Location,
+                Contact: dto.Contact,
+                TypeOfService: dto.TypeOfService,
+                POSSystem: dto.POSSystem,
+                AmountOfOrders: dto.AmountOfOrders,
+                ContactPerson: dto.ContactPerson,
+                Phone: dto.Phone,
+                UserId: dto.UserId
+            });
+            return res.status(201).json(cafe);
+        }
+
+    } catch (error) {
+        return res.status(400).json({ error: error.message, line: "line 35" });
+    }
+});
+
+router.get('/cafes', async (req, res) => {
+    try {
+        const cafes = await Cafe.findAll();
+        res.json(cafes);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/cafes/:id', async (req, res) => {
+    try {
+        const cafe = await Cafe.findByPk(req.params.id);
+        if (!cafe) {
+            return res.status(404).json({ message: 'Cafe not found' });
+        }
+        res.json(cafe);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }   
+});
+
+router.delete('/cafes/:id', async (req, res) => {
+    try {
+        const cafe = await Cafe.findByPk(req.params.id);
+        if (!cafe) {
+            return res.status(404).json({ message: 'Cafe not found' });
+        }
+        await cafe.destroy();
+        res.json({ message: 'Cafe deleted successfully' });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+router.patch('/cafes/:id', async (req, res) => {
+    try {
+        const dto = new CreateCafeDto(req.body);
+        const validationError = dto.validate();
+        const cafe = await Cafe.findByPk(req.params.id);
+        if (!cafe) {
+            return res.status(404).json({ message: 'Cafe not found' });
+        }
+        else if (validationError.success !== true) {
+            return res.status(400).json({
+                message: "line 80 (patch): " + validationError.message
+            });
+        } else{
+            const cafe = await Cafe.update({
+                Name: dto.Name,
+                Location: dto.Location,
+                Contact: dto.Contact,
+                TypeOfService: dto.TypeOfService,
+                POSSystem: dto.POSSystem,
+                AmountOfOrders: dto.AmountOfOrders,
+                ContactPerson: dto.ContactPerson,
+                Phone: dto.Phone,
+                UserId: dto.UserId,
+                
+            }, {
+                where: {
+                    id: req.params.id
+                }
+            });
+            
+            res.json(cafe);
+            return res.status(200).json(cafe);
+        }
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+module.exports = router;
