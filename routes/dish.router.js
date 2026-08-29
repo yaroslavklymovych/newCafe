@@ -3,6 +3,8 @@ const router = express.Router();
 const dishService = require('../middleware/dishValidate');
 const { CreateDishDto } = require('../dto/dish.dto');
 const Dish = require('../models/Dish');
+const { where } = require('sequelize');
+
 
 router.post('/dish', async (req, res) => {
     try {
@@ -60,26 +62,35 @@ router.get('/dish', async (req, res) => {
 
 router.patch('/dish/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-        const { name, description, taste, price, weight, categoryID, menuID } = req.body;
-
-        const dish = await Dish.findByPk(id);
+        const dto = new CreateDishDto(req.body);
+        const validationError = dto.validate();
+        const dish = await Dish.findByPk(req.params.id);
         if (!dish) {
-            return res.status(404).json({ error: 'Dish not found' });
+            return res.status(404).json({ message: "Dish not found" });
         }
+        else if (validationError.success !== true) {
+            return res.status(400).json({ message: "line 70 (patch): " + validationError.message})
+        } 
+        else{
+            const dish = await Dich.update({
+                Name: dto.Name,
+                Taste: dto.Taste,
+                Description: dto.Description,
+                Price: dto.Price,
+                Weight: dto.Weight,
+                CategoryID: dto.CategoryID,
+                MenuId: dto.MenuId
+            }, {
+                where: {
+                    id: req.params.id
+                }
+            });
 
-        await dish.update({
-            name,
-            description,
-            taste,
-            price,
-            weight,
-            categoryID
-        });
-
-        res.json(dish);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+            res.json(dish);
+            return res.status(200).json(dish);
+        }
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
     }
 });
 

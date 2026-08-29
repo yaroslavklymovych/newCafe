@@ -15,6 +15,7 @@ const ingridientRoutes = require('./routes/ingridient.routes');
 const menuRoutes = require('./routes/menu.routes');
 const Employee = require('./models/Employee');
 const employeeRoutes = require('./routes/employee.routes');
+const dishRoutes = require('.routes/dish/routes')
 const Dish = require('./models/Dish');
 
 
@@ -24,7 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const dishRouter = require('./routes/dish.router');
 
 // app.use('/dishes', dish.router);
 // app.use(dishValidate.validateDish);
@@ -33,7 +33,7 @@ const dishRouter = require('./routes/dish.router');
 app.use(category);
 app.use(subcategory);
 app.use(form);
-app.use('/api', dishRouter);
+app.use(dishRoutes)
 app.use('/api/user', user);
 app.use('/api/users', userRoutes);
 app.use(userRoutes);
