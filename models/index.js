@@ -29,7 +29,8 @@ Bookmark.belongsTo(Dish, { foreignKey: 'FK_Dish' });
 Category.hasMany(Dish, { foreignKey: 'FK_Category'});
 Dish.belongsTo(Category, { foreignKey: 'FK_Category'});
 
-
+Cafe.hasMany(Menu, { foreignKey: 'CafeId' });
+Menu.belongsTo(Cafe, { foreignKey: 'CafeId' });
 
 User.hasMany(Cafe, {foreignKey: 'UserId'});
 Cafe.belongsTo(User, {foreignKey: 'UserId'});

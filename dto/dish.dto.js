@@ -6,6 +6,7 @@ class CreateDishDto {
         Price,
         Weight,
         CategoryID,
+        MenuId
     }) {
         this.Name = Name
         this.Taste = Taste
@@ -13,15 +14,17 @@ class CreateDishDto {
         this.Price = Price
         this.Weight = Weight
         this.CategoryID = CategoryID
+        this.MenuId = MenuId
     }
 
     validate() {
-        if (!this.Name || this.Name.trim() === "") throw new Error("Name is required")
-        if (!this.Taste || this.Taste.trim() === "") throw new Error("Taste is required")
-        if (!this.Description || this.Description.trim() === "") throw new Error("Description is required")    
-        if (this.Price === undefined || this.Price === null || isNaN(this.Price)) throw new Error("Price must be a valid number")
-        if (!this.Weight || this.Weight.trim() === "") throw new Error("Weight is required")
-        if (!this.CategoryID || this.CategoryID.trim() === "") throw new Error("CategoryID is required")
+        if (!this.Name || this.Name.trim() === "") return { success: false, message: "Name is required" }
+        if (!this.Taste || this.Taste.trim() === "") return { success: false, message: "Taste is required" }
+        if (!this.Description || this.Description.trim() === "") return { success: false, message: "Description is required" }
+        if (this.Price === undefined || this.Price === null || isNaN(this.Price)) return { success: false, message: "Price must be a valid number" }
+        if (!this.Weight || this.Weight.trim() === "") return { success: false, message: "Weight is required" }
+        if (!this.CategoryID || this.CategoryID.trim() === "") return { success: false, message: "CategoryID is required" }
+        if (!this.MenuId || this.MenuId.trim() === "") return { success: false, message: "MenuId is required" }
 
         return { success: true, message: "Validation successful" }
     }
@@ -35,7 +38,8 @@ class DishResponseDto {
         Description,
         Price,
         Weight,
-        CategoryID
+        CategoryID,
+        MenuId
     }) {
         this.ID = ID
         this.Name = Name
@@ -44,19 +48,28 @@ class DishResponseDto {
         this.Price = Price
         this.Weight = Weight
         this.CategoryID = CategoryID
-        
+        this.MenuId = MenuId
     }
 }
 
 
 class UpdateDishDto {
-    constructor(name, taste, price, weight) {
-        this.Name = name
-        this.Taste = taste
+    constructor({
+        Name,
+        Taste,
+        Description
+        Price,
+        Weight,
+        CategoryID,
+        MenuId
+    }) {
+        this.Name = Name
+        this.Taste = Taste
         this.Description = Description
-        this.Price = price
-        this.Weight = weight
+        this.Price = Price
+        this.Weight = Weight
         this.CategoryID = CategoryID
+        this.MenuId = MenuId
     }
 }
 

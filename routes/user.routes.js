@@ -8,8 +8,32 @@ const  User  = require('../models/User');
 const { auth } = require('../middleware/auth');
 const { checkRole } = require('../middleware/roles');
 
+router.post('/register', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        const dto = new CreateUserDto(name, email, password);
+        const validationError = dto.validate();
+        if (!validationError.success) {
+            return res.status(400).json({ message: validationError.message });
+        }
+        const hashedPassword = await bcrypt.hash(password, 5);
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword
+        });
+        res.status(201).json({
+            message: 'User created successfully',
+            id: user.id,
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
 
-router.get('/profile', auth, async (req, res) => {
+router.get('/login', auth, async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
             attributes: { exclude: ['Password'] }

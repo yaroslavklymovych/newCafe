@@ -14,6 +14,10 @@ const Menu = sequelize.define('Menu', {
     description: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    CafeId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     }
 });
 

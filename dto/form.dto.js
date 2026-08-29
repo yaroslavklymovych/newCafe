@@ -1,3 +1,5 @@
+import { PasswordValidatorManager } from '@password-validator/core';
+
 class CreateFormDto {
     constructor({
         Name,
@@ -24,12 +26,6 @@ class CreateFormDto {
         this.Password = Password
         this.Username = Username
     }
-    validatePassword(password){
-            const passwordRegex = /^(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-            if (!passwordRegex.test(password)) {
-                throw new Error("Password must be at least 8 characters long and contain at least 6 letters and 2 numbers");
-            }
-    }
     validate() {
         if (!this.Name || this.Name.trim() === "") throw new Error("Name is required")
         if (!this.Location || this.Location.trim() === "") throw new Error("Location is required")
@@ -41,10 +37,10 @@ class CreateFormDto {
         if (!this.ContactPerson || this.ContactPerson.trim() === "") throw new Error("ContactPerson is required")
         if (!this.Phone || this.Phone.trim() === "") throw new Error("Phone is required")
         if (!this.Email || this.Email.trim() === "") throw new Error("Email is required")
-        // if (!this.Password || this.Password.trim() === "") throw new Error("Password is required")  
         if (!this.Username || this.Username.trim() === "") throw new Error("Username is required")
-        if (this.Password) {
-            this.validatePassword(this.Password)
+        const result = PasswordValidatorManager.fluent().min(8) .digit(1) .specialCharacter(1).validate(this.password);
+        if (!result) {
+            return { success: false, message: "Password does not meet the requirements" };
         }
     }
 }

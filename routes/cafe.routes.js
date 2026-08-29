@@ -7,17 +7,13 @@ const router = express.Router();
 const Cafe = require('../models/Cafe');
 const { where } = require('sequelize');
 
-router.post('/cafes', async (req, res) => {
+router.post('/cafe', async (req, res) => {
     try {
         const dto = new CreateCafeDto(req.body);
         console.log(dto);
         const validationError = dto.validate();
 
-        if (validationError.success !== true) {
-            return res.status(400).json({
-                message: "line 17: " + validationError.message
-            });
-        } else{
+        if (validationError.success !== false) {
             const cafe = await Cafe.create({
                 Name: dto.Name,
                 Location: dto.Location,
@@ -30,14 +26,18 @@ router.post('/cafes', async (req, res) => {
                 UserId: dto.UserId
             });
             return res.status(201).json(cafe);
+        } else{
+            return res.status(400).json({
+                message: "line 31: " + validationError.message
+            });
         }
 
     } catch (error) {
-        return res.status(400).json({ error: error.message, line: "line 35" });
+        return res.status(500).json({ error: error.message, line: "line 36" });
     }
 });
 
-router.get('/cafes', async (req, res) => {
+router.get('/cafe', async (req, res) => {
     try {
         const cafes = await Cafe.findAll();
         res.json(cafes);
@@ -46,7 +46,7 @@ router.get('/cafes', async (req, res) => {
     }
 });
 
-router.get('/cafes/:id', async (req, res) => {
+router.get('/cafe/:id', async (req, res) => {
     try {
         const cafe = await Cafe.findByPk(req.params.id);
         if (!cafe) {
@@ -58,7 +58,7 @@ router.get('/cafes/:id', async (req, res) => {
     }   
 });
 
-router.delete('/cafes/:id', async (req, res) => {
+router.delete('/cafe/:id', async (req, res) => {
     try {
         const cafe = await Cafe.findByPk(req.params.id);
         if (!cafe) {
@@ -70,7 +70,8 @@ router.delete('/cafes/:id', async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 });
-router.patch('/cafes/:id', async (req, res) => {
+
+router.patch('/cafe/:id', async (req, res) => {
     try {
         const dto = new CreateCafeDto(req.body);
         const validationError = dto.validate();

@@ -15,6 +15,7 @@ const ingridientRoutes = require('./routes/ingridient.routes');
 const menuRoutes = require('./routes/menu.routes');
 const Employee = require('./models/Employee');
 const employeeRoutes = require('./routes/employee.routes');
+const Dish = require('./models/Dish');
 
 
 app.use(express.json());
@@ -32,7 +33,7 @@ const dishRouter = require('./routes/dish.router');
 app.use(category);
 app.use(subcategory);
 app.use(form);
-app.use('/api/dish', dishRouter);
+app.use('/api', dishRouter);
 app.use('/api/user', user);
 app.use('/api/users', userRoutes);
 app.use(userRoutes);
@@ -43,8 +44,8 @@ app.use(employeeRoutes);
 (async () => {
   try {
     await sequelize.authenticate();
-    await Employee.sync({ force: false });
     console.log("Connection Ok");
+    await sequelize.sync({ force: false });
     console.log("DB synced!");
 
   } catch (e) {
