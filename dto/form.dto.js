@@ -1,4 +1,4 @@
-import { PasswordValidatorManager } from '@password-validator/core';
+const { PasswordValidatorManager } = require('@password-validator/core');
 
 class CreateFormDto {
     constructor({
@@ -38,7 +38,7 @@ class CreateFormDto {
         if (!this.Phone || this.Phone.trim() === "") throw new Error("Phone is required")
         if (!this.Email || this.Email.trim() === "") throw new Error("Email is required")
         if (!this.Username || this.Username.trim() === "") throw new Error("Username is required")
-        const result = PasswordValidatorManager.fluent().min(8) .digit(1) .specialCharacter(1).validate(this.password);
+        const result = PasswordValidatorManager.fluent().min(8) .digit(1) .specialCharacter(1).validate(this.Password);
         if (!result) {
             return { success: false, message: "Password does not meet the requirements" };
         }

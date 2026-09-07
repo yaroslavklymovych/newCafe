@@ -57,7 +57,7 @@ class UpdateDishDto {
     constructor({
         Name,
         Taste,
-        Description
+        Description,
         Price,
         Weight,
         CategoryID,

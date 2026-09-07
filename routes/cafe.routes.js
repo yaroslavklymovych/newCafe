@@ -3,9 +3,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const { CreateCafeDto } = require('../dto/cafe.dto');
 const router = express.Router();
-
+const authMiddleware = require('../middleware/auth');
 const Cafe = require('../models/Cafe');
 const { where } = require('sequelize');
+
+router.use(authMiddleware);
 
 router.post('/cafe', async (req, res) => {
     try {
@@ -23,7 +25,7 @@ router.post('/cafe', async (req, res) => {
                 AmountOfOrders: dto.AmountOfOrders,
                 ContactPerson: dto.ContactPerson,
                 Phone: dto.Phone,
-                UserId: dto.UserId
+                UserId: req.user.id
             });
             return res.status(201).json(cafe);
         } else{
@@ -39,7 +41,9 @@ router.post('/cafe', async (req, res) => {
 
 router.get('/cafe', async (req, res) => {
     try {
-        const cafes = await Cafe.findAll();
+        const cafes = await Cafe.findAll({
+            where: { UserId: req.user.id }
+        });
         res.json(cafes);
     } catch (error) {
         return res.status(500).json({ error: error.message });
@@ -48,7 +52,12 @@ router.get('/cafe', async (req, res) => {
 
 router.get('/cafe/:id', async (req, res) => {
     try {
-        const cafe = await Cafe.findByPk(req.params.id);
+        const cafe = await Cafe.findOne({
+            where: {
+                id: req.params.id,
+                UserId: req.user.id
+            }
+        });
         if (!cafe) {
             return res.status(404).json({ message: 'Cafe not found' });
         }
@@ -60,7 +69,12 @@ router.get('/cafe/:id', async (req, res) => {
 
 router.delete('/cafe/:id', async (req, res) => {
     try {
-        const cafe = await Cafe.findByPk(req.params.id);
+        const cafe = await Cafe.findOne({
+            where: {
+                id: req.params.id,
+                UserId: req.user.id
+            }
+        });
         if (!cafe) {
             return res.status(404).json({ message: 'Cafe not found' });
         }
@@ -75,7 +89,12 @@ router.patch('/cafe/:id', async (req, res) => {
     try {
         const dto = new CreateCafeDto(req.body);
         const validationError = dto.validate();
-        const cafe = await Cafe.findByPk(req.params.id);
+        const cafe = await Cafe.findOne({
+            where: {
+                id: req.params.id,
+                UserId: req.user.id
+            }
+        });
         if (!cafe) {
             return res.status(404).json({ message: 'Cafe not found' });
         }
@@ -93,7 +112,7 @@ router.patch('/cafe/:id', async (req, res) => {
                 AmountOfOrders: dto.AmountOfOrders,
                 ContactPerson: dto.ContactPerson,
                 Phone: dto.Phone,
-                UserId: dto.UserId,
+                UserId: req.user.id,
                 
             }, {
                 where: {

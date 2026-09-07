@@ -1,5 +1,4 @@
-import { PasswordValidatorManager } from '@password-validator/core';
-
+const { PasswordValidatorManager } = require('@password-validator/core');
 
 class CreateUserDto {
     constructor(name, email, password) {

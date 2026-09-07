@@ -3,9 +3,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const router = express.Router();
-
+const { CreateUserDto } = require('../dto/user.dto'); 
 const  User  = require('../models/User');
-const { auth } = require('../middleware/auth');
+const auth = require('../middleware/auth');
 const { checkRole } = require('../middleware/roles');
 
 router.post('/register', async (req, res) => {
