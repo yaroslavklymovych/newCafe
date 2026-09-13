@@ -3,6 +3,8 @@ const path = require('path');
 const listEndpoints = require('express-list-endpoints');
 const { sequelize } = require('./models');
 
+
+const form = require('./controllers/form.controller'); 
 // Route Imports
 const category = require('./routes/category.routes');
 const subcategory = require('./routes/subcategory');
@@ -16,7 +18,7 @@ const dishRoutes = require('./routes/dish.routes'); // Fixed path syntax
 
 // Controller / Middleware Imports
 // Note: Ensure form.controller is used in a route rather than passed directly to app.use()
-const form = require('./controllers/form.controller'); 
+
 
 const app = express();
 
@@ -29,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
+app.use(form);
 app.use(category);
 app.use(subcategory);
 app.use(dishRoutes);
@@ -38,6 +41,7 @@ app.use(cafeRoutes);
 app.use(ingridientRoutes);
 app.use(menuRoutes);
 app.use(employeeRoutes);
+
 
 // Example: Map form controller to a specific endpoint instead of app.use(form)
 // app.post('/api/form', form.submitForm);

@@ -12,32 +12,34 @@ router.use(authMiddleware);
 router.post('/cafe', async (req, res) => {
     try {
         const dto = new CreateCafeDto(req.body);
-        console.log(dto);
-        const validationError = dto.validate();
 
-        if (validationError.success !== false) {
-            const cafe = await Cafe.create({
-                Name: dto.Name,
-                Location: dto.Location,
-                Contact: dto.Contact,
-                TypeOfService: dto.TypeOfService,
-                POSSystem: dto.POSSystem,
-                AmountOfOrders: dto.AmountOfOrders,
-                ContactPerson: dto.ContactPerson,
-                Phone: dto.Phone,
-                UserId: req.user.id
-            });
-            return res.status(201).json(cafe);
-        } else{
-            return res.status(400).json({
-                message: "line 31: " + validationError.message
-            });
+        dto.validate(); 
+
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Unauthorized: User ID missing" });
         }
 
+        const cafe = await Cafe.create({
+            Name: dto.Name,
+            Location: dto.Location,
+            Contact: dto.Contact,
+            TypeOfService: dto.TypeOfService,
+            POSSystem: dto.POSSystem,
+            AmountOfOrders: dto.AmountOfOrders,
+            ContactPerson: dto.ContactPerson,
+            Phone: dto.Phone,
+            UserId: req.user?.id
+        });
+
+        return res.status(201).json(cafe);
+
     } catch (error) {
-        return res.status(500).json({ error: error.message, line: "line 36" });
+        
+        console.error("Error creating cafe:", error);
+        return res.status(400).json({ message: error.message });
     }
 });
+
 
 router.get('/cafe', async (req, res) => {
     try {

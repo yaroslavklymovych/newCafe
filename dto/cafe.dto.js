@@ -20,19 +20,20 @@ constructor({
         this.Phone = Phone;
         this.UserId = UserId;
     }
-    validate(){
-        if (!this.Name || this.Name.trim() === "") return { success: false, error: "Name is required" };
-        else if (!this.Location || this.Location.trim() === "") return { success: false, error: "Location is required" };
-        else if (!this.Contact || this.Contact.trim() === "") return { success: false, error: "Contact is required" };
-        else if (!this.TypeOfService || this.TypeOfService.trim() === "") return { success: false, error: "TypeOfService is required" };
-        else if (!this.POSSystem || this.POSSystem.trim() === "") return { success: false, error: "POSSystem is required" };
-        else if (!this.AmountOfOrders || !Number.isFinite(this.AmountOfOrders)) return { success: false, error: "AmountOfOrders must be a number" };
-        else if (!this.ContactPerson || this.ContactPerson.trim() === "") return { success: false, error: "ContactPerson is required" };
-        else if (!this.Phone || this.Phone.trim() === "") return { success: false, error: "Phone is required" };
-        else if (!this.UserId || !Number.isFinite(this.UserId)) return { success: false, error: "UserId must be a number" };
+    validate() {
+    if (!this.Name || this.Name.trim() === "") throw new Error("Name is required");
+    if (!this.Location || this.Location.trim() === "") throw new Error("Location is required");
+    if (!this.Contact || this.Contact.trim() === "") throw new Error("Contact is required");
+    if (!this.TypeOfService || this.TypeOfService.trim() === "") throw new Error("TypeOfService is required");
+    if (!this.POSSystem || this.POSSystem.trim() === "") throw new Error("POSSystem is required");
+    if (!this.AmountOfOrders || !Number.isFinite(this.AmountOfOrders)) throw new Error("AmountOfOrders must be a number");
+    if (!this.ContactPerson || this.ContactPerson.trim() === "") throw new Error("ContactPerson is required");
+    if (!this.Phone || this.Phone.trim() === "") throw new Error("Phone is required");
+    if (!this.UserId || !Number.isFinite(this.UserId)) throw new Error("UserId must be a number");
 
-        return { success: true };
-    }
+    return true;
+}
+
 }
 
 class CafeResponseDto {

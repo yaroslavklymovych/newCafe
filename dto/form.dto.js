@@ -42,6 +42,8 @@ class CreateFormDto {
         if (!result) {
             return { success: false, message: "Password does not meet the requirements" };
         }
+
+        return { success: true, message: "Validation successful" }
     }
 }
 

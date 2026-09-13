@@ -5,7 +5,6 @@ const SubCategory = require('./SubCategory');
 const Dish = require('./Dish');
 const Bookmark = require('./Bookmarks');
 const Employee = require('./Employee');
-const Form = require('./Form');
 const User = require('./User');
 const Cafe = require('./Cafe');
 const Ingridients = require('./Ingridients');
@@ -48,9 +47,8 @@ module.exports = {
   Dish,
   Bookmark,
   Employee,
-  Form,
-  User,
   Cafe,
+  User,
   Ingridients,
   Menu
 };
