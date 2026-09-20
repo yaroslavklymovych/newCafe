@@ -1,37 +1,17 @@
-
-// router.post('/login', async (req, res) => {
-//     const { email, password } = req.body;  
-//     const user = await users.findOne({ where: { email: email.trim().toLowerCase() } });
-//     console.log(req.body);
-//     //const hashedPassword = bcrypt.hashSync(password, 10);
-//     console.log(user);
-//     if (!user) {
-//         return res.status(401).json({ message: "Invalid email or password" });
-//     }
-//     if (password === user.password) {
-//         console.log(req.body);
-//         console.log(user);
-//         const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, jwtSecret, { expiresIn: '1h' });
-//         return res.json({ token });
-    
-//     }
-
-    
-//     return res.status(401).json({ message: "Invalid password" });
-// });
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
-const User = require('../models/User'); 
+const User = require('../models/User');
 const { jwtSecret } = require('../config');
 
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        
-        const user = await User.findOne({ 
-            where: { Email: email.trim().toLowerCase() } 
+
+        const user = await User.findOne({
+            where: { Email: email.trim().toLowerCase() }
         });
 
         if (!user) {
@@ -39,19 +19,21 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
-     
-        console.log("User found:", user.Email); 
+        console.log("User found:", user.Email);
 
-     
-        if (password === user.Password) { 
-            
+        // FIX: was comparing plaintext password to the stored hash
+        // (password === user.Password). Since /register hashes the
+        // password with bcrypt, that comparison would never match.
+        const passwordMatches = await bcrypt.compare(password, user.Password);
+
+        if (passwordMatches) {
             const token = jwt.sign(
-                { 
-                    id: user.id, 
-                    email: user.Email, 
-                    role: user.role || 'user' 
-                }, 
-                jwtSecret, 
+                {
+                    id: user.id,
+                    email: user.Email,
+                    role: user.role || 'user'
+                },
+                jwtSecret,
                 { expiresIn: '1h' }
             );
 
@@ -66,4 +48,5 @@ router.post('/login', async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 });
+
 module.exports = router;

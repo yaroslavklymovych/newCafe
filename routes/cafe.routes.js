@@ -1,18 +1,14 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
 const { CreateCafeDto } = require('../dto/cafe.dto');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
 const Cafe = require('../models/Cafe');
-const { where } = require('sequelize');
 
-router.use(authMiddleware);
+// authMiddleware убран из глобального router.use() и добавлен индивидуально к роутам
 
-router.post('/cafe', async (req, res) => {
+router.post('/cafe', authMiddleware, async (req, res) => {
     try {
         const dto = new CreateCafeDto(req.body);
-
         dto.validate(); 
 
         if (!req.user || !req.user.id) {
@@ -28,20 +24,17 @@ router.post('/cafe', async (req, res) => {
             AmountOfOrders: dto.AmountOfOrders,
             ContactPerson: dto.ContactPerson,
             Phone: dto.Phone,
-            UserId: req.user?.id
+            UserId: req.user.id
         });
 
         return res.status(201).json(cafe);
-
     } catch (error) {
-        
         console.error("Error creating cafe:", error);
         return res.status(400).json({ message: error.message });
     }
 });
 
-
-router.get('/cafe', async (req, res) => {
+router.get('/cafe', authMiddleware, async (req, res) => {
     try {
         const cafes = await Cafe.findAll({
             where: { UserId: req.user.id }
@@ -52,7 +45,7 @@ router.get('/cafe', async (req, res) => {
     }
 });
 
-router.get('/cafe/:id', async (req, res) => {
+router.get('/cafe/:id', authMiddleware, async (req, res) => {
     try {
         const cafe = await Cafe.findOne({
             where: {
@@ -69,7 +62,7 @@ router.get('/cafe/:id', async (req, res) => {
     }   
 });
 
-router.delete('/cafe/:id', async (req, res) => {
+router.delete('/cafe/:id', authMiddleware, async (req, res) => {
     try {
         const cafe = await Cafe.findOne({
             where: {
@@ -87,7 +80,7 @@ router.delete('/cafe/:id', async (req, res) => {
     }
 });
 
-router.patch('/cafe/:id', async (req, res) => {
+router.patch('/cafe/:id', authMiddleware, async (req, res) => {
     try {
         const dto = new CreateCafeDto(req.body);
         const validationError = dto.validate();
@@ -100,31 +93,27 @@ router.patch('/cafe/:id', async (req, res) => {
         if (!cafe) {
             return res.status(404).json({ message: 'Cafe not found' });
         }
-        else if (validationError.success !== true) {
+        if (validationError.success !== true) {
             return res.status(400).json({
-                message: "line 80 (patch): " + validationError.message
+                message: "Validation error: " + validationError.message
             });
-        } else{
-            const cafe = await Cafe.update({
-                Name: dto.Name,
-                Location: dto.Location,
-                Contact: dto.Contact,
-                TypeOfService: dto.TypeOfService,
-                POSSystem: dto.POSSystem,
-                AmountOfOrders: dto.AmountOfOrders,
-                ContactPerson: dto.ContactPerson,
-                Phone: dto.Phone,
-                UserId: req.user.id,
-                
-            }, {
-                where: {
-                    id: req.params.id
-                }
-            });
-            
-            res.json(cafe);
-            return res.status(200).json(cafe);
         }
+
+        await Cafe.update({
+            Name: dto.Name,
+            Location: dto.Location,
+            Contact: dto.Contact,
+            TypeOfService: dto.TypeOfService,
+            POSSystem: dto.POSSystem,
+            AmountOfOrders: dto.AmountOfOrders,
+            ContactPerson: dto.ContactPerson,
+            Phone: dto.Phone,
+            UserId: req.user.id,
+        }, {
+            where: { id: req.params.id }
+        });
+
+        return res.status(200).json({ message: "Cafe updated successfully" });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }

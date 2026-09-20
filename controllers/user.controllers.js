@@ -1,9 +1,11 @@
-const {CreateUserDto, UpdateUserDto, UserResponseDto} = require('../dto/user.dto');
+const { CreateUserDto, UpdateUserDto, UserResponseDto } = require('../dto/user.dto');
 
 const User = require('../services/user.service');
 
 class UserController {
-    async createUser(req, res) {
+    // FIX: `next` was used inside the catch block but was never
+    // declared as a parameter, causing a ReferenceError on any failure.
+    async createUser(req, res, next) {
         try {
             const dto = new CreateUserDto(req.body.name, req.body.email, req.body.password);
             const user = await User.createUser(dto.name, dto.email);
@@ -12,23 +14,26 @@ class UserController {
             next(error);
         }
     }
-    async getAllUsers(req, res) {
+
+    async getAllUsers(req, res, next) {
         try {
             const users = await User.getAllUsers();
             return res.status(200).json(users.map(user => new UserResponseDto(user)));
         } catch (error) {
             next(error);
-        } 
-    }        
-    async getUserById(req, res, next) {
-            try {
-                const dto = new UpdateUserDto(req.body);
-                const user = await User.getUserById(req.params.id);
-                return res.status(200).json(new UserResponseDto(user));
-            } catch (error) {
-                next(error);
-            }  
+        }
     }
+
+    async getUserById(req, res, next) {
+        try {
+            const dto = new UpdateUserDto(req.body);
+            const user = await User.getUserById(req.params.id);
+            return res.status(200).json(new UserResponseDto(user));
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async deleteUser(req, res, next) {
         try {
             const result = await User.deleteUser(req.params.id);

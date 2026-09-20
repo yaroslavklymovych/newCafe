@@ -3,25 +3,38 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const router = express.Router();
-const { CreateUserDto } = require('../dto/user.dto'); 
-const  User  = require('../models/User');
+const { CreateUserDto } = require('../dto/user.dto');
+const User = require('../models/User');
 const auth = require('../middleware/auth');
 const { checkRole } = require('../middleware/roles');
 
+const SALT_ROUNDS = 10;
+
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        // Поддерживаем как name, так и username / Name / Username
+        const name = req.body.name || req.body.username || req.body.Name || req.body.Username;
+        const email = req.body.email || req.body.Email;
+        const password = req.body.password || req.body.Password;
+
+        if (!name) {
+            return res.status(400).json({ message: 'Name/Username is required' });
+        }
+
         const dto = new CreateUserDto(name, email, password);
-        const validationError = dto.validate();
-        if (!validationError.success) {
+        const validationError = typeof dto.validate === 'function' ? dto.validate() : null;
+        if (validationError && !validationError.success) {
             return res.status(400).json({ message: validationError.message });
         }
-        const hashedPassword = await bcrypt.hash(password, 5);
+
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
         const user = await User.create({
-            name,
-            email,
-            password: hashedPassword
+            Username: name,
+            Email: email,
+            Password: hashedPassword
         });
+
         res.status(201).json({
             message: 'User created successfully',
             id: user.id,
@@ -33,94 +46,68 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.get('/login', auth, async (req, res) => {
+router.get('/me', auth, async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
             attributes: { exclude: ['Password'] }
         });
 
         if (!user) {
-            return res.status(404).json({
-                message: 'User not found'
-            });
+            return res.status(404).json({ message: 'User not found' });
         }
         res.json(user);
     } catch (err) {
-        res.status(500).json({
-            message: err.message
-        });
+        res.status(500).json({ message: err.message });
     }
 });
 
-
 router.get('/user', auth, checkRole('admin'), async (req, res) => {
-        try {
-            const users = await User.findAll({
-                attributes: { exclude: ['password'] }
-            });
-            res.json(users);
-        } catch (err) {
-            res.status(500).json({
-                message: err.message
-            });
-        }
+    try {
+        const users = await User.findAll({
+            attributes: { exclude: ['Password'] }
+        });
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
-);
+});
 
 router.patch('/:id', auth, async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
         if (!user) {
-            return res.status(404).json({
-                message: 'User not found'
-            });
+            return res.status(404).json({ message: 'User not found' });
         }
-        const { email, password, username } = req.body;
-        if (email) {
-            user.email = email;
-        }
-        if (username) {
-            user.username = username;
-        }
-        if (password) {
-            user.password = await bcrypt.hash(password, 10);
-        }
+        const email = req.body.email || req.body.Email;
+        const password = req.body.password || req.body.Password;
+        const username = req.body.username || req.body.Username || req.body.name || req.body.Name;
+
+        if (email) user.Email = email;
+        if (username) user.Username = username;
+        if (password) user.Password = await bcrypt.hash(password, SALT_ROUNDS);
+
         await user.save();
         res.json({
             message: 'User updated',
             user
         });
     } catch (err) {
-        res.status(500).json({
-            message: err.message
-        });
+        res.status(500).json({ message: err.message });
     }
 });
 
-
+// DELETE /api/users/:id
 router.delete('/:id', auth, checkRole('admin'), async (req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
         if (!user) {
-            return res.status(404).json({
-                message: 'User not found'
-            });
+            return res.status(404).json({ message: 'User not found' });
         }
         await user.destroy();
-
-        res.json({
-            message: 'User deleted'
-        });
-
+        res.json({ message: 'User deleted successfully' });
     } catch (err) {
-        res.status(500).json({
-            message: err.message
-        });
+        res.status(500).json({ message: err.message });
     }
 });
-
-// router.get('/admin', auth, checkRole("admin"), (req, res) => {
-//     res.json({ message: `Welcome to the admin panel, ${req.user.email}!` });
-// });
 
 module.exports = router;
